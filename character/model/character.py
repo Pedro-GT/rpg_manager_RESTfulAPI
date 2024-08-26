@@ -22,7 +22,7 @@ class Character(models.Model):
 
     def __str__(self):
         return ( 
-            f"{self.first_name} {self.last_name} ({self.race.name}) - "
-            f"Status: Strength: {self.strength}, Resistence: {self.resistence}, "
-            f"Dexterity: {self.dexterity}, Intelligence: {self.intelligence}, "
+            f"{self.first_name} {self.last_name} ({self.race.name}) -"
+            f"Status: Strength: {self.strength}, Resistence: {self.resistence},"
+            f"Dexterity: {self.dexterity}, Intelligence: {self.intelligence},"
             f"Charisma: {self.charisma}, Luck: {self.luck}, Magic: {self.magic}")
