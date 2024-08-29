@@ -6,6 +6,7 @@ from .serializer import (
     RegionSerializer
 )
 
+
 class CharacterViewSet(viewsets.ModelViewSet):
     queryset = Character.objects.all()
     serializer_class = CharacterSerializer
@@ -21,8 +22,5 @@ class SkillViewSet(viewsets.ModelViewSet):
 class RegionViewSet(viewsets.ModelViewSet):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
-
-
-
 
 
