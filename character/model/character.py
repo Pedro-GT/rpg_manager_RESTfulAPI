@@ -19,6 +19,8 @@ class Character(models.Model):
     luck = models.IntegerField()
     magic = models.IntegerField()
     bio = models.TextField()
+    
+
 
     def __str__(self):
         return ( 

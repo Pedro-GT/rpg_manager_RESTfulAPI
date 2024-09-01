@@ -41,7 +41,26 @@ INSTALLED_APPS = [
     'character',
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt',
+    "authentication",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ROTATE_REFRESH_TOKENS': True,
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,8 +74,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    # "https://rpg-manager-front-r2gpvrhar-pedros-projects-8f2a2446.vercel.app/"
+    "http://13.59.119.206/",
 ]
 
 ROOT_URLCONF = 'rpg_manager_api.urls'
@@ -108,6 +126,7 @@ DATABASES = {
     },
   }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -1,0 +1,12 @@
+services:
+
+  api:
+    image: pedrohgt/rpg_manager_api:latest
+    container_name: rpg_manager_api
+    ports:
+      - "8000:8000"
+    environment:
+      - PGHOST=ep-long-fire-a56rxl3h.us-east-2.aws.neon.tech
+      - PGDATABASE=rpg_webApp
+      - PGUSER=rpg_webApp_owner
+      - PGPASSWORD=nPdfNQkq3T9r
