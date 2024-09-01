@@ -27,7 +27,7 @@ jobs:
     - name: Build and tag Docker image
       run: |
         docker build -t pedrohgt/rpg_manager_api:latest .
-        docker tag pedrohgt/rpg_manager_api:latest pedrohgt/rpg_manager_api:v4
+        docker tag pedrohgt/rpg_manager_api:latest pedrohgt/rpg_manager_api:v5
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
@@ -38,5 +38,5 @@ jobs:
     - name: Push Docker images
       run: |
         docker push pedrohgt/rpg_manager_api:latest
-        docker push pedrohgt/rpg_manager_api:v4
+        docker push pedrohgt/rpg_manager_api:v5
 
