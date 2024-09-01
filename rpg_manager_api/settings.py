@@ -71,13 +71,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'rpg_manager_RESTfulAPI.middleware.reference_middleware.ReferrerPolicyMiddleware',
-
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://13.59.119.206/",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'rpg_manager_api.urls'
 
