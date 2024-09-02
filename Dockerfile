@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /app/
 
 # Instale as dependências Python
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt --verbose
+RUN pip install --no-cache-dir -r requirements.txt 
 
 
 # Copie todo o código do projeto para o diretório de trabalho
