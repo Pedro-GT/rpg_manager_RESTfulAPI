@@ -41,22 +41,22 @@ class CharacterSerializer(serializers.ModelSerializer):
         return character
 
     def update(self, instance, validated_data):
-        # Atualiza todos os campos que são fornecidos, exceto a imagem e as habilidades
+        
+        
         for attr, value in validated_data.items():
-            if attr not in ['picture', 'skills_data']:  # Ignora a imagem e as habilidades por enquanto
+            if attr not in ['picture', 'skills_data']: 
                 setattr(instance, attr, value)
         
-        # Verifica se uma nova imagem foi fornecida; se não, mantém a imagem antiga
+        
         picture = validated_data.get('picture', None)
-        if picture is not None:  # Atualiza a imagem apenas se fornecida
+        if picture is not None:  
             instance.picture = picture
         
-        # Verifica se novas habilidades foram fornecidas
+        
         if 'skills_data' in validated_data:
-            if validated_data['skills_data']:  # Se skills_data não for vazio, atualiza as skills
+            if validated_data['skills_data']:  
                 instance.skills.set(validated_data['skills_data'])
-            # Se skills_data for uma lista vazia, preserva as habilidades existentes
-            # Se quiser implementar remoção com lista vazia, colocar a lógica aqui
+
 
         instance.save()
 
