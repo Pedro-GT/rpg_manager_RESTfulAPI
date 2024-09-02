@@ -33,6 +33,7 @@ class LoginViewSet(viewsets.ViewSet):
             return Response({
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
+                "user": user.id
             })
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 

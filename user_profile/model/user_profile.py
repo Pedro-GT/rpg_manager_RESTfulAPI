@@ -7,7 +7,7 @@ from character.model import Character
 
 
 class User_Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True)
     characters = models.ManyToManyField(Character, related_name='users')
     inventory = models.TextField(blank=True, null=True)
     logs = models.ManyToManyField(Log)
