@@ -26,18 +26,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return user_profile
 
     def update(self, instance, validated_data):
+        # Handle logs_data
+        logs_data = validated_data.pop('logs_data', None)
         
-        
-        for attr, value in validated_data.items():
-            if attr not in ['characters', 'logs_data']: 
-                setattr(instance, attr, value)
-        
-        
-        if 'logs_data' in validated_data:
-            if validated_data['logs_data']:  
-                instance.logs.set(validated_data['logs_data'])
+        # Update other fields as usual
+        instance = super().update(instance, validated_data)
 
-
-        instance.save()
-
+        if logs_data is not None:
+            # Clear existing logs and set new ones
+            instance.logs.set(logs_data)
+        
         return instance
