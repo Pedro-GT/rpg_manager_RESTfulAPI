@@ -1,0 +1,27 @@
+name: EC2 Setup
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]  
+    types:
+      - completed
+
+jobs:
+  ec2-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan "${{ secrets.EC2_IP_ADDRESS }}" >> ~/.ssh/known_hosts
+
+    - name: Run setup.sh on EC2
+      run: |
+        ssh -i ~/.ssh/id_rsa ubuntu@"${{ secrets.EC2_IP_ADDRESS }}" 'cd /home/ubuntu && bash setup.sh'
+
