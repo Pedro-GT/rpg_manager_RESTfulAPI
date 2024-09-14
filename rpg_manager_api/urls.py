@@ -24,4 +24,6 @@ urlpatterns = [
     path('', include('character.urls')),
     path('auth/', include('authentication.urls')),
     path('user-profile/', include('user_profile.urls')),
+    path('monster/', include('monster.urls')),
+    path('mission/', include('mission.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

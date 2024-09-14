@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     "authentication",
     "user_profile",
+    "monster",
+    "mission",
+    "storages",
 ]
 
 REST_FRAMEWORK = {
@@ -162,13 +165,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+#importing storage
+from storages.backends.s3boto3 import S3Boto3Storage
 
+# S3 connection
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
 
 BASEDIR = Path(__file__).resolve().parent.parent
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
