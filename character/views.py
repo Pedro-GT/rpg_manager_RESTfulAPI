@@ -22,6 +22,19 @@ class CharacterViewSet(viewsets.ModelViewSet):
             character.save()
         serializer = self.get_serializer(characters, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path='by-first-name')
+    def get_by_first_name(self, request):
+        first_name = request.query_params.get('first_name').capitalize()
+        if not first_name:
+            return Response({"error": "first_name query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        characters = Character.objects.filter(first_name=first_name)
+        if not characters.exists():
+            return Response({"error": "Character not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.get_serializer(characters, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class RaceViewSet(viewsets.ModelViewSet):
     queryset = Race.objects.all()
