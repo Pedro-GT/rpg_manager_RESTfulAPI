@@ -1,23 +1,19 @@
 FROM python:3.12-slim
 
-# Defina o diretório de trabalho dentro do container
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    libpq-dev gcc
+    libpq-dev gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copie os arquivos de requisitos para o container
 COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Instale as dependências Python
-RUN pip install --no-cache-dir -r requirements.txt 
-
-
-# Copie todo o código do projeto para o diretório de trabalho
 COPY . /app/
 
-# Exponha a porta em que o Django irá rodar
+RUN SECRET_KEY=build-placeholder PGDATABASE=x PGUSER=x PGPASSWORD=x PGHOST=x \
+    python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
-# Comando para rodar o servidor Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "rpg_manager_api.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
