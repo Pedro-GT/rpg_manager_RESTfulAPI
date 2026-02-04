@@ -4,12 +4,12 @@ from .region import Region
 from .skill import Skill
 
 class Character(models.Model):
-    first_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=50, db_index=True)
     last_name = models.CharField(max_length=50)
     age = models.IntegerField()
     race = models.ForeignKey(Race, on_delete=models.SET_NULL, null=True, blank=True)
     skills = models.ManyToManyField(Skill)
-    picture = models.ImageField(upload_to='media/') 
+    picture = models.ImageField(upload_to='characters/', blank=True)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)
     strength = models.IntegerField()
     resistence = models.IntegerField()

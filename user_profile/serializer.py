@@ -10,7 +10,8 @@ class LogSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     logs = LogSerializer(many=True, read_only=True)
     logs_data = serializers.PrimaryKeyRelatedField(many=True, queryset=Log.objects.all(), write_only=True, required=False)
-    
+    user_username = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = User_Profile
         fields = '__all__'

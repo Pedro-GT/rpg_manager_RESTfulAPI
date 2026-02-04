@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RPG Manager</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            700: '#1e2a3a',
+                            800: '#151f2e',
+                            900: '#0b1120',
+                            950: '#060a14',
+                        },
+                        accent: {
+                            400: '#f87171',
+                            500: '#e94560',
+                            600: '#c81e45',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'character/css/custom.css' %}">
+</head>
+<body class="bg-dark-950 text-gray-200 min-h-screen flex items-center justify-center">
+
+<div x-data="authApp()" class="w-full max-w-md px-6" x-cloak>
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-accent-500">RPG Manager</h1>
+        <p class="text-gray-500 text-sm mt-1">Manage your adventures</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-dark-900 border border-gray-800 rounded-xl p-6">
+
+        <!-- Tabs -->
+        <div class="flex mb-6 border-b border-gray-800">
+            <button @click="mode = 'login'"
+                    :class="mode === 'login' ? 'border-accent-500 text-accent-500' : 'border-transparent text-gray-500 hover:text-gray-300'"
+                    class="flex-1 pb-3 text-sm font-medium border-b-2 transition-colors">
+                Login
+            </button>
+            <button @click="mode = 'register'"
+                    :class="mode === 'register' ? 'border-accent-500 text-accent-500' : 'border-transparent text-gray-500 hover:text-gray-300'"
+                    class="flex-1 pb-3 text-sm font-medium border-b-2 transition-colors">
+                Register
+            </button>
+        </div>
+
+        <!-- Error message -->
+        <div x-show="error" x-transition
+             class="mb-4 bg-red-950 border border-red-900/50 text-red-300 text-sm rounded-lg px-4 py-3">
+            <span x-text="error"></span>
+        </div>
+
+        <!-- Success message -->
+        <div x-show="success" x-transition
+             class="mb-4 bg-green-950 border border-green-900/50 text-green-300 text-sm rounded-lg px-4 py-3">
+            <span x-text="success"></span>
+        </div>
+
+        <!-- Login Form -->
+        <form x-show="mode === 'login'" @submit.prevent="login()" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Username</label>
+                <input type="text" x-model="loginData.username" required
+                       class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <input type="password" x-model="loginData.password" required
+                       class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition-colors">
+            </div>
+            <button type="submit" :disabled="submitting"
+                    class="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                <span x-show="!submitting">Sign In</span>
+                <span x-show="submitting">Signing in...</span>
+            </button>
+        </form>
+
+        <!-- Register Form -->
+        <form x-show="mode === 'register'" @submit.prevent="register()" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Username</label>
+                <input type="text" x-model="registerData.username" required
+                       class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <input type="password" x-model="registerData.password" required
+                       class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Confirm Password</label>
+                <input type="password" x-model="registerData.confirmPassword" required
+                       class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2.5 text-sm text-gray-200 outline-none transition-colors">
+            </div>
+            <button type="submit" :disabled="submitting"
+                    class="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                <span x-show="!submitting">Create Account</span>
+                <span x-show="submitting">Creating account...</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'authentication/js/auth.js' %}"></script>
+</body>
+</html>

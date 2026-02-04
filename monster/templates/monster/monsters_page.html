@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Monsters - RPG Manager{% endblock %}
+
+{% block content %}
+<div x-data="monstersApp()" x-init="init()" class="p-6" x-cloak>
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+        <h1 class="text-2xl font-bold text-gray-100">Monsters</h1>
+        <button @click="openCreateModal()"
+                class="bg-accent-500 hover:bg-accent-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            + New Monster
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-4 mb-6 flex-wrap">
+        <input type="text" x-model="filters.search" @input.debounce.300ms="applyFilters()"
+               placeholder="Search by name..."
+               class="bg-dark-900 border border-gray-700 focus:border-accent-500 rounded-lg px-4 py-2 text-gray-200 w-64 text-sm outline-none transition-colors">
+        <div x-data="searchSelect()" class="relative w-48" @click.away="close()">
+            <button type="button" @click="toggle()"
+                    class="w-full bg-dark-900 border border-gray-700 hover:border-gray-600 rounded-lg px-4 py-2 text-sm outline-none transition-colors flex items-center justify-between">
+                <span x-text="filters.rank || 'All Ranks'"
+                      :class="filters.rank ? 'text-gray-200' : 'text-gray-500'"></span>
+                <svg class="w-4 h-4 text-gray-500 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open" x-transition class="absolute z-50 mt-1 w-full bg-dark-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                <div class="p-2">
+                    <input x-ref="searchInput" x-model="search" placeholder="Search..." @click.stop
+                           class="w-full bg-dark-900 border border-gray-700 focus:border-accent-500 rounded px-3 py-1.5 text-sm text-gray-200 outline-none">
+                </div>
+                <div class="max-h-48 overflow-y-auto">
+                    <button type="button" @click="filters.rank = ''; close(); applyFilters()"
+                            class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-dark-700">All Ranks</button>
+                    <template x-for="r in rankChoices.filter(v => !search || v.toLowerCase().includes(search.toLowerCase()))" :key="r">
+                        <button type="button" @click="filters.rank = r; close(); applyFilters()"
+                                class="w-full text-left px-3 py-2 text-sm hover:bg-dark-700"
+                                :class="filters.rank === r ? 'text-accent-400 bg-dark-700' : 'text-gray-200'"
+                                x-text="r"></button>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <div x-data="searchSelect()" class="relative w-48" @click.away="close()">
+            <button type="button" @click="toggle()"
+                    class="w-full bg-dark-900 border border-gray-700 hover:border-gray-600 rounded-lg px-4 py-2 text-sm outline-none transition-colors flex items-center justify-between">
+                <span x-text="regions.find(r => r.id == filters.region)?.name || 'All Regions'"
+                      :class="filters.region ? 'text-gray-200' : 'text-gray-500'"></span>
+                <svg class="w-4 h-4 text-gray-500 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open" x-transition class="absolute z-50 mt-1 w-full bg-dark-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                <div class="p-2">
+                    <input x-ref="searchInput" x-model="search" placeholder="Search..." @click.stop
+                           class="w-full bg-dark-900 border border-gray-700 focus:border-accent-500 rounded px-3 py-1.5 text-sm text-gray-200 outline-none">
+                </div>
+                <div class="max-h-48 overflow-y-auto">
+                    <button type="button" @click="filters.region = ''; close(); applyFilters()"
+                            class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-dark-700">All Regions</button>
+                    <template x-for="region in regions.filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()))" :key="region.id">
+                        <button type="button" @click="filters.region = region.id; close(); applyFilters()"
+                                class="w-full text-left px-3 py-2 text-sm hover:bg-dark-700"
+                                :class="filters.region == region.id ? 'text-accent-400 bg-dark-700' : 'text-gray-200'"
+                                x-text="region.name"></button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monster cards grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <template x-for="monster in filteredMonsters" :key="monster.id">
+            <div @click="openDetailModal(monster)"
+                 class="bg-dark-900 border border-gray-800 rounded-xl overflow-hidden hover:border-accent-500/50 transition-all duration-200 cursor-pointer group card-glow">
+                <!-- Picture -->
+                <div class="h-44 bg-dark-800 overflow-hidden">
+                    <template x-if="monster.picture">
+                        <img :src="monster.picture"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             :alt="monster.name">
+                    </template>
+                    <template x-if="!monster.picture">
+                        <div class="w-full h-full flex items-center justify-center text-gray-600">
+                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                      d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </template>
+                </div>
+                <!-- Info -->
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="font-bold text-base text-gray-100" x-text="monster.name"></h3>
+                        <span x-show="monster.rank && monster.rank !== 'Unknown'"
+                              class="text-xs font-bold px-2 py-0.5 rounded"
+                              :class="{
+                                  'bg-red-900/50 text-red-300': monster.rank === 'S',
+                                  'bg-orange-900/50 text-orange-300': monster.rank === 'A',
+                                  'bg-yellow-900/50 text-yellow-300': monster.rank === 'B',
+                                  'bg-green-900/50 text-green-300': monster.rank === 'C',
+                                  'bg-blue-900/50 text-blue-300': monster.rank === 'D',
+                                  'bg-purple-900/50 text-purple-300': monster.rank === 'E',
+                                  'bg-gray-800 text-gray-400': monster.rank === 'F',
+                              }"
+                              x-text="'Rank ' + monster.rank"></span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <span x-show="monster.type" x-text="monster.type"></span>
+                        <span x-show="monster.type && monster.region">&middot;</span>
+                        <span x-show="monster.region" x-text="monster.region?.name"></span>
+                    </div>
+                </div>
+                <!-- Actions -->
+                <div class="px-4 pb-4 flex gap-2" @click.stop>
+                    <button @click="openEditModal(monster)"
+                            class="flex-1 text-xs bg-dark-700 hover:bg-dark-800 border border-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                        Edit
+                    </button>
+                    <button @click="deleteMonster(monster.id)"
+                            class="text-xs bg-red-950 hover:bg-red-900 border border-red-900/50 text-red-300 hover:text-red-200 px-3 py-1.5 rounded-lg transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Empty state -->
+    <div x-show="!loading && filteredMonsters.length === 0" class="text-center py-16 text-gray-500">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                  d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-lg">No monsters found</p>
+    </div>
+
+    <!-- Loading spinner -->
+    <div x-show="loading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-gray-700 border-t-accent-500"></div>
+    </div>
+
+    <!-- Backdrop -->
+    <div x-show="showFormModal || showDetailModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="closeModals()"
+         class="fixed inset-0 bg-black/60 z-40"></div>
+
+    <!-- Create/Edit slide-in modal -->
+    <div x-show="showFormModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="fixed inset-y-0 right-0 w-full max-w-lg bg-dark-900 border-l border-gray-800 shadow-2xl z-50 overflow-y-auto">
+
+        <div class="p-6">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-100"
+                    x-text="editingMonster ? 'Edit Monster' : 'New Monster'"></h2>
+                <button @click="closeModals()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form @submit.prevent="submitForm()" class="space-y-4">
+                <!-- Picture upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Picture</label>
+                    <input type="file" accept="image/*"
+                           @change="formData.picture = $event.target.files[0]"
+                           class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-dark-700 file:text-gray-300 hover:file:bg-dark-800 file:cursor-pointer file:transition-colors">
+                </div>
+
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Name</label>
+                    <input type="text" x-model="formData.name" required
+                           class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none transition-colors">
+                </div>
+
+                <!-- Type, Rank, Region -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Type</label>
+                        <input type="text" x-model="formData.type"
+                               class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none transition-colors">
+                    </div>
+                    <div x-data="searchSelect()" class="relative" @click.away="close()">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Rank</label>
+                        <button type="button" @click="toggle()"
+                                class="w-full bg-dark-800 border border-gray-700 hover:border-gray-600 rounded-lg px-3 py-2 text-sm outline-none transition-colors flex items-center justify-between">
+                            <span x-text="formData.rank || 'Unknown'"
+                                  :class="formData.rank ? 'text-gray-200' : 'text-gray-500'"></span>
+                            <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-1 w-full bg-dark-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                            <div class="p-2">
+                                <input x-ref="searchInput" x-model="search" placeholder="Search..." @click.stop
+                                       class="w-full bg-dark-900 border border-gray-700 focus:border-accent-500 rounded px-3 py-1.5 text-sm text-gray-200 outline-none">
+                            </div>
+                            <div class="max-h-48 overflow-y-auto">
+                                <button type="button" @click="formData.rank = ''; close()"
+                                        class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-dark-700">Unknown</button>
+                                <template x-for="r in rankChoices.filter(v => !search || v.toLowerCase().includes(search.toLowerCase()))" :key="r">
+                                    <button type="button" @click="formData.rank = r; close()"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-dark-700"
+                                            :class="formData.rank === r ? 'text-accent-400 bg-dark-700' : 'text-gray-200'"
+                                            x-text="r"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-data="searchSelect()" class="relative" @click.away="close()">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Region</label>
+                        <button type="button" @click="toggle()"
+                                class="w-full bg-dark-800 border border-gray-700 hover:border-gray-600 rounded-lg px-3 py-2 text-sm outline-none transition-colors flex items-center justify-between">
+                            <span x-text="regions.find(r => r.id == formData.region_id)?.name || 'None'"
+                                  :class="formData.region_id ? 'text-gray-200' : 'text-gray-500'"></span>
+                            <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-1 w-full bg-dark-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                            <div class="p-2">
+                                <input x-ref="searchInput" x-model="search" placeholder="Search..." @click.stop
+                                       class="w-full bg-dark-900 border border-gray-700 focus:border-accent-500 rounded px-3 py-1.5 text-sm text-gray-200 outline-none">
+                            </div>
+                            <div class="max-h-48 overflow-y-auto">
+                                <button type="button" @click="formData.region_id = ''; close()"
+                                        class="w-full text-left px-3 py-2 text-sm text-gray-400 hover:bg-dark-700">None</button>
+                                <template x-for="region in regions.filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()))" :key="region.id">
+                                    <button type="button" @click="formData.region_id = region.id; close()"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-dark-700"
+                                            :class="formData.region_id == region.id ? 'text-accent-400 bg-dark-700' : 'text-gray-200'"
+                                            x-text="region.name"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Bio</label>
+                    <textarea x-model="formData.bio" rows="4"
+                              class="w-full bg-dark-800 border border-gray-700 focus:border-accent-500 rounded-lg px-3 py-2 text-sm text-gray-200 outline-none transition-colors resize-none"></textarea>
+                </div>
+
+                <!-- Submit -->
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            :disabled="submitting"
+                            class="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        <span x-show="!submitting" x-text="editingMonster ? 'Save Changes' : 'Create Monster'"></span>
+                        <span x-show="submitting">Saving...</span>
+                    </button>
+                    <button type="button" @click="closeModals()"
+                            class="px-6 bg-dark-700 hover:bg-dark-800 border border-gray-700 text-gray-300 py-2.5 rounded-lg text-sm transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Detail slide-in modal -->
+    <div x-show="showDetailModal"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="fixed inset-y-0 right-0 w-full max-w-2xl bg-dark-900 border-l border-gray-800 shadow-2xl z-50 overflow-y-auto">
+
+        <template x-if="detailMonster">
+            <div class="p-6">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-100" x-text="detailMonster.name"></h2>
+                    <div class="flex items-center gap-2">
+                        <button @click="openEditModal(detailMonster)"
+                                class="text-sm bg-dark-700 hover:bg-dark-800 border border-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+                            Edit
+                        </button>
+                        <button @click="closeModals()" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monster picture -->
+                <div x-show="detailMonster.picture" class="mb-6 rounded-xl overflow-hidden max-h-72">
+                    <img :src="detailMonster.picture" class="w-full object-cover" :alt="detailMonster.name">
+                </div>
+
+                <!-- Monster info -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-dark-800 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">Type</div>
+                        <div class="text-gray-200 font-medium" x-text="detailMonster.type || 'Unknown'"></div>
+                    </div>
+                    <div class="bg-dark-800 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">Rank</div>
+                        <div class="font-bold"
+                             :class="{
+                                 'text-red-400': detailMonster.rank === 'S',
+                                 'text-orange-400': detailMonster.rank === 'A',
+                                 'text-yellow-400': detailMonster.rank === 'B',
+                                 'text-green-400': detailMonster.rank === 'C',
+                                 'text-blue-400': detailMonster.rank === 'D',
+                                 'text-purple-400': detailMonster.rank === 'E',
+                                 'text-gray-400': detailMonster.rank === 'F' || !detailMonster.rank || detailMonster.rank === 'Unknown',
+                             }"
+                             x-text="detailMonster.rank || 'Unknown'"></div>
+                    </div>
+                    <div class="bg-dark-800 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">Region</div>
+                        <div class="text-gray-200 font-medium" x-text="detailMonster.region?.name || 'Unknown'"></div>
+                    </div>
+                </div>
+
+                <!-- Bio -->
+                <div x-show="detailMonster.bio" class="mb-6">
+                    <h3 class="text-sm font-medium text-gray-400 mb-2">Bio</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed bg-dark-800 rounded-lg p-4" x-text="detailMonster.bio"></p>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'monster/js/monsters.js' %}"></script>
+{% endblock %}

@@ -1,10 +1,15 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.views.generic import TemplateView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, LoginSerializer
+
+
+class LoginPageView(TemplateView):
+    template_name = 'authentication/login_page.html'
 
 class RegisterViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
