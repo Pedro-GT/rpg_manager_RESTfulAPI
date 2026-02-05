@@ -1,0 +1,43 @@
+/* Hide Alpine.js elements until initialized */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b1120;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e2a3a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2a3a4e;
+}
+
+/* Card hover glow */
+.card-glow:hover {
+    box-shadow: 0 0 24px rgba(233, 69, 96, 0.1);
+}
+
+/* Smooth page transitions */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Select option dark styling (browser limitation workaround) */
+select option {
+    background: #151f2e;
+    color: #e5e7eb;
+}
+
+/* Checkbox accent */
+input[type="checkbox"] {
+    accent-color: #e94560;
+}
